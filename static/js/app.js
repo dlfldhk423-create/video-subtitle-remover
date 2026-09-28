@@ -20,20 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadLoading = document.getElementById('upload-loading');
   const uploadStatusText = document.getElementById('upload-status-text');
 
-  // 시니어 가이드 접기/펼치기
-  const seniorGuideToggle = document.getElementById('senior-guide-toggle');
-  const seniorGuideBody = document.getElementById('senior-guide-body');
-  const guideToggleText = document.getElementById('guide-toggle-text');
-  const toggleArrow = document.getElementById('toggle-arrow');
-
-  if (seniorGuideToggle) {
-    seniorGuideToggle.addEventListener('click', () => {
-      const isHidden = seniorGuideBody.classList.toggle('hidden');
-      toggleArrow.classList.toggle('collapsed', isHidden);
-      guideToggleText.textContent = isHidden ? '설명 보기' : '설명 닫기';
-    });
-  }
-
   const uploadSection = document.getElementById('upload-section');
   const editorSection = document.getElementById('editor-section');
   const progressSection = document.getElementById('progress-section');
