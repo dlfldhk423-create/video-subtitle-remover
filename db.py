@@ -94,17 +94,20 @@ def update_task_status(task_id: str, status: str, processing_time_sec: float = 0
         print(f"작업 상태 갱신 에러: {e}")
 
 
+EXCLUDE_FILTER = "ip NOT IN ('114.39.1.184', '127.0.0.1', 'localhost', '::1')"
+
+
 def get_dashboard_stats() -> Dict[str, Any]:
-    """관리자 요약 통계 지표 계산 (실제 페이지 방문만 집계)"""
+    """관리자 요약 통계 지표 계산 (관리자 IP 제외 및 실제 페이지 방문만 집계)"""
     with get_db() as conn:
         cursor = conn.cursor()
 
-        # 실제 사이트 메인 페이지 접속 수 (path = '/')
-        cursor.execute("SELECT COUNT(*) FROM visit_logs WHERE path = '/'")
+        # 실제 사이트 메인 페이지 접속 수 (path = '/' and 관리자 IP 제외)
+        cursor.execute(f"SELECT COUNT(*) FROM visit_logs WHERE path = '/' AND {EXCLUDE_FILTER}")
         total_visits = cursor.fetchone()[0]
 
         # 오늘 방문 수
-        cursor.execute("SELECT COUNT(*) FROM visit_logs WHERE path = '/' AND date(created_at) = date('now')")
+        cursor.execute(f"SELECT COUNT(*) FROM visit_logs WHERE path = '/' AND date(created_at) = date('now') AND {EXCLUDE_FILTER}")
         today_visits = cursor.fetchone()[0]
 
         # 총 처리 작업 수
@@ -120,7 +123,7 @@ def get_dashboard_stats() -> Dict[str, Any]:
         total_video_seconds = cursor.fetchone()[0]
 
         # 모바일 vs 데스크톱 비율
-        cursor.execute("SELECT device, COUNT(*) FROM visit_logs WHERE path = '/' GROUP BY device")
+        cursor.execute(f"SELECT device, COUNT(*) FROM visit_logs WHERE path = '/' AND {EXCLUDE_FILTER} GROUP BY device")
         devices = dict(cursor.fetchall())
 
         return {
@@ -149,12 +152,13 @@ def get_recent_activity(limit: int = 50) -> List[Dict[str, Any]]:
 
 
 def get_recent_visitors(limit: int = 50) -> List[Dict[str, Any]]:
-    """최근 방문자 목록"""
+    """최근 방문자 목록 (관리자 IP 제외)"""
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT ip, device, user_agent, path, datetime(created_at, 'localtime') as created_at
             FROM visit_logs
+            WHERE {EXCLUDE_FILTER}
             ORDER BY id DESC
             LIMIT ?
         """, (limit,))

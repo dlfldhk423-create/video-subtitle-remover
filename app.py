@@ -48,7 +48,10 @@ app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 # 관리자 기본 비밀번호
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "19141914")
+
+# 관리자 및 자체 테스트 제외 IP 목록 (누적 방문자 통계 제외)
+EXCLUDED_IPS = {"114.39.1.184", "127.0.0.1", "localhost", "::1"}
 
 # 작업 상태 관리
 tasks_status: Dict[str, Dict[str, Any]] = {}
@@ -57,18 +60,21 @@ cancel_flags: Dict[str, bool] = {}
 
 @app.middleware("http")
 async def track_visitors_middleware(request: Request, call_next):
-    """방문자 접속 정보 자동 로깅 (API 폴링 및 정적 리소스 제외, 실제 사이트 접속만 기록)"""
+    """방문자 접속 정보 자동 로깅 (API 폴링, 정적 리소스, 관리자 IP 제외)"""
     path = request.url.path
     # API 요청, 정적 파일, 헬스체크는 제외하고 오직 메인 웹페이지('/') 접속만 방문자로 카운트
     if path == "/" and request.method == "GET":
         client_ip = request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for") or (request.client.host if request.client else "unknown")
         if "," in client_ip:
             client_ip = client_ip.split(",")[0].strip()
-        user_agent = request.headers.get("user-agent", "unknown")
-        try:
-            db.log_visit(ip=client_ip, user_agent=user_agent, path=path)
-        except Exception:
-            pass
+        
+        # 관리자 IP 및 로컬 IP는 누적 방문자에 포함하지 않음
+        if client_ip not in EXCLUDED_IPS:
+            user_agent = request.headers.get("user-agent", "unknown")
+            try:
+                db.log_visit(ip=client_ip, user_agent=user_agent, path=path)
+            except Exception:
+                pass
 
     response = await call_next(request)
     return response
