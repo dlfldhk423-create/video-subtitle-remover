@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.db
+dashboard.db
 
 # 업로드 및 출력 결과 비디오 (개인 파일 보호)
 uploads/*

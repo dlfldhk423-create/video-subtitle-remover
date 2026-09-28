@@ -8,9 +8,13 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Streamin
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
+from starlette.responses import Response
 import cv2
 import aiofiles
+import time
+import shutil
 
+import db
 from processor import (
     extract_frame_at_time,
     get_video_info,
@@ -43,14 +47,110 @@ app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
+# 관리자 기본 비밀번호
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
+
 # 작업 상태 관리
 tasks_status: Dict[str, Dict[str, Any]] = {}
 cancel_flags: Dict[str, bool] = {}
 
 
+@app.middleware("http")
+async def track_visitors_middleware(request: Request, call_next):
+    """방문자 접속 정보 자동 로깅"""
+    path = request.url.path
+    # 정적 리소스는 제외하고 주요 페이지 및 API 요청만 기록
+    if not path.startswith(("/static", "/outputs", "/favicon.ico")) and request.method == "GET":
+        client_ip = request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for") or (request.client.host if request.client else "unknown")
+        if "," in client_ip:
+            client_ip = client_ip.split(",")[0].strip()
+        user_agent = request.headers.get("user-agent", "unknown")
+        try:
+            db.log_visit(ip=client_ip, user_agent=user_agent, path=path)
+        except Exception:
+            pass
+
+    response = await call_next(request)
+    return response
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    """관리자 대시보드 페이지"""
+    return templates.TemplateResponse(request=request, name="admin.html")
+
+
+@app.post("/api/admin/login")
+async def admin_login(password: str = Form(...)):
+    """관리자 로그인 확인"""
+    if password == ADMIN_PASSWORD:
+        return JSONResponse({"status": "success", "token": "admin_authenticated"})
+    raise HTTPException(status_code=401, detail="비밀번호가 올바르지 않습니다.")
+
+
+@app.get("/api/admin/stats")
+async def admin_stats():
+    """관리자 통계 지표 및 로그 조회"""
+    stats = db.get_dashboard_stats()
+    recent_tasks = db.get_recent_activity(limit=40)
+    recent_visitors = db.get_recent_visitors(limit=40)
+
+    # 디스크 사용량 계산
+    def get_dir_size_mb(path):
+        total = 0
+        if os.path.exists(path):
+            for dirpath, dirnames, filenames in os.walk(path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    if os.path.isfile(fp):
+                        total += os.path.getsize(fp)
+        return round(total / (1024 * 1024), 2)
+
+    uploads_size = get_dir_size_mb(UPLOAD_DIR)
+    outputs_size = get_dir_size_mb(OUTPUT_DIR)
+
+    return JSONResponse({
+        "stats": stats,
+        "recent_tasks": recent_tasks,
+        "recent_visitors": recent_visitors,
+        "storage": {
+            "uploads_mb": uploads_size,
+            "outputs_mb": outputs_size,
+            "total_mb": round(uploads_size + outputs_size, 2)
+        }
+    })
+
+
+@app.post("/api/admin/clean")
+async def admin_clean_storage():
+    """임시 업로드 및 출력 파일 정리"""
+    cleaned_count = 0
+    cleaned_bytes = 0
+
+    for d in [UPLOAD_DIR, OUTPUT_DIR]:
+        if os.path.exists(d):
+            for f in os.listdir(d):
+                if f.startswith(".gitkeep"):
+                    continue
+                fp = os.path.join(d, f)
+                try:
+                    if os.path.isfile(fp):
+                        cleaned_bytes += os.path.getsize(fp)
+                        os.remove(fp)
+                        cleaned_count += 1
+                except Exception:
+                    pass
+
+    return JSONResponse({
+        "status": "success",
+        "cleaned_files": cleaned_count,
+        "cleaned_mb": round(cleaned_bytes / (1024 * 1024), 2)
+    })
 
 
 @app.post("/api/upload")
@@ -198,6 +298,7 @@ def run_video_task(
     def is_cancelled():
         return cancel_flags.get(task_id, False)
 
+    start_time = time.time()
     try:
         tasks_status[task_id]["status"] = "processing"
         success = process_video_subtitles(
@@ -211,20 +312,26 @@ def run_video_task(
             progress_callback=update_progress,
             cancel_flag=is_cancelled
         )
+        elapsed = time.time() - start_time
         if success:
             tasks_status[task_id]["status"] = "completed"
             tasks_status[task_id]["percent"] = 100.0
             tasks_status[task_id]["download_url"] = f"/api/download/{task_id}"
             tasks_status[task_id]["video_url"] = f"/outputs/{os.path.basename(output_path)}"
+            db.update_task_status(task_id, "completed", elapsed)
         else:
             tasks_status[task_id]["status"] = "cancelled"
+            db.update_task_status(task_id, "cancelled", elapsed)
     except Exception as e:
+        elapsed = time.time() - start_time
         tasks_status[task_id]["status"] = "failed"
         tasks_status[task_id]["error"] = str(e)
+        db.update_task_status(task_id, "failed", elapsed)
 
 
 @app.post("/api/process")
 async def start_process(
+    request: Request,
     background_tasks: BackgroundTasks,
     video_id: str = Form(...),
     rois_json: str = Form(...),
@@ -258,6 +365,24 @@ async def start_process(
         "eta_seconds": 0
     }
     cancel_flags[task_id] = False
+
+    # 작업 메타데이터 DB 로깅
+    info = get_video_info(video_path)
+    file_size_mb = round(os.path.getsize(video_path) / (1024 * 1024), 2) if os.path.exists(video_path) else 0.0
+    client_ip = request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for") or (request.client.host if request.client else "unknown")
+    if "," in client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+
+    db.create_task_log(
+        task_id=task_id,
+        ip=client_ip,
+        filename=os.path.basename(found_files[0]),
+        file_size_mb=file_size_mb,
+        resolution=f"{info.get('width', 0)}x{info.get('height', 0)}",
+        duration_sec=info.get("duration", 0.0),
+        total_frames=info.get("total_frames", 0),
+        mode=mode
+    )
 
     background_tasks.add_task(
         run_video_task,
