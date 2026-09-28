@@ -3,6 +3,11 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 내 컴퓨터(로컬)에서 실행 시 다운로드 박스 및 상단 다운로드 버튼 자동 제거
+  if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+    document.querySelectorAll('.pc-download-box, .header-badges').forEach(el => el.remove());
+  }
+
   // 상태 변수
   let currentVideoId = null;
   let videoInfo = null;

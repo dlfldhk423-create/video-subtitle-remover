@@ -29,6 +29,7 @@
           <p class="logo-sub">AI 텍스트 인페인팅 & 하드서브 자막 자동 복원 스튜디오</p>
         </div>
       </div>
+      {% if not is_local %}
       <div class="header-badges">
         <a href="/api/download-app/windows-exe" class="btn btn-download-badge btn-win" download="SubtitleRemover.exe">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -37,10 +38,12 @@
           윈도우용 다운로드 (.exe)
         </a>
       </div>
+      {% endif %}
     </header>
 
     <main class="main-content">
-      <!-- 내 컴퓨터 직접 다운로드 및 실행 방법 안내 카드 -->
+      {% if not is_local %}
+      <!-- 내 컴퓨터 직접 다운로드 및 실행 방법 안내 카드 (외부 공유 웹페이지 접속 시에만 표시) -->
       <section class="card pc-download-box">
         <div class="pdb-header">
           <div class="pdb-header-left">
@@ -80,9 +83,9 @@
               </div>
             </div>
           </div>
-
         </div>
       </section>
+      {% endif %}
       <!-- 1단계: 업로드 영역 -->
       <section id="upload-section" class="card upload-card">
         <div id="drop-zone" class="drop-zone">

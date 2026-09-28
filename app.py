@@ -76,7 +76,13 @@ async def track_visitors_middleware(request: Request, call_next):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html")
+    host = request.headers.get("host", "").lower()
+    is_local = getattr(sys, 'frozen', False) or host.startswith(("127.0.0.1", "localhost"))
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"is_local": is_local}
+    )
 
 
 @app.get("/admin", response_class=HTMLResponse)
