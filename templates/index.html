@@ -46,18 +46,62 @@
     </header>
 
     <main class="main-content">
-      <!-- 내 PC 다운로드 안내 띠 배너 -->
-      <div class="pc-download-banner">
-        <div class="pdb-text">
-          <span class="pdb-tag">PC 설치형</span>
-          <span>인터넷 속도 걱정 없이 내 컴퓨터에서 무제한으로 고속 처리하려면?</span>
+      <!-- 내 컴퓨터 직접 다운로드 및 실행 방법 안내 카드 -->
+      <section class="card pc-download-box">
+        <div class="pdb-header">
+          <div class="pdb-header-left">
+            <span class="pdb-tag">무제한 / 초고속</span>
+            <h2 class="pdb-title">💻 내 컴퓨터에 직접 다운로드해서 실행하기</h2>
+          </div>
+          <p class="pdb-subtitle">인터넷 연결 속도나 서버 대기 없이 내 컴퓨터에서 무제한으로 영상을 고속 처리할 수 있습니다.</p>
         </div>
-        <div class="pdb-buttons">
-          <a href="/api/download-app/windows" class="btn-text-link" download>🪟 Windows PC용 (.zip)</a>
-          <span class="pdb-divider">|</span>
-          <a href="/api/download-app/mac" class="btn-text-link" download>🍎 Mac용 (.zip)</a>
+
+        <div class="pdb-os-grid">
+          <!-- Windows 다운로드 & 실행법 -->
+          <div class="pdb-os-card win-card">
+            <div class="pdb-os-top">
+              <div class="os-brand">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
+                </svg>
+                <span>Windows PC (윈도우용)</span>
+              </div>
+              <a href="/api/download-app/windows" class="btn btn-primary btn-sm btn-os-dl" download>
+                📥 윈도우용 다운로드 (.zip)
+              </a>
+            </div>
+            <div class="os-steps">
+              <span class="os-step-badge">간단 실행 방법:</span>
+              <ol class="os-step-list">
+                <li>다운로드한 <code>SubtitleRemover-Windows.zip</code> 압축을 풉니다.</li>
+                <li>폴더 안의 <strong><code>run_windows.bat</code></strong> 파일을 <strong>더블클릭</strong>하면 웹 브라우저가 열리며 즉시 실행됩니다!</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Mac 다운로드 & 실행법 -->
+          <div class="pdb-os-card mac-card">
+            <div class="pdb-os-top">
+              <div class="os-brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.66-.82 1.11-1.95.99-3.09-.95.04-2.14.65-2.82 1.45-.6.69-1.12 1.83-1 2.94 1.07.08 2.17-.48 2.83-1.3"/>
+                </svg>
+                <span>MacBook / Mac (맥북용)</span>
+              </div>
+              <a href="/api/download-app/mac" class="btn btn-secondary btn-sm btn-os-dl" download>
+                📥 맥북용 다운로드 (.zip)
+              </a>
+            </div>
+            <div class="os-steps">
+              <span class="os-step-badge">간단 실행 방법:</span>
+              <ol class="os-step-list">
+                <li>다운로드한 <code>SubtitleRemover-Mac.zip</code> 압축을 풉니다.</li>
+                <li>터미널을 열고 폴더에서 <strong><code>./run.sh</code></strong> 명령어만 치면 M칩 가속으로 즉시 실행됩니다!</li>
+              </ol>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
       <!-- 1단계: 업로드 영역 -->
       <section id="upload-section" class="card upload-card">
         <div id="drop-zone" class="drop-zone">
