@@ -30,11 +30,11 @@
         </div>
       </div>
       <div class="header-badges">
-        <a href="/api/download-app/windows" class="btn btn-download-badge btn-win" download>
+        <a href="/api/download-app/windows-exe" class="btn btn-download-badge btn-win" download="SubtitleRemover.exe">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
             <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
           </svg>
-          윈도우용 다운로드
+          윈도우용 다운로드 (.exe)
         </a>
         <a href="/api/download-app/mac" class="btn btn-download-badge btn-mac" download>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -64,18 +64,26 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/>
                 </svg>
-                <span>Windows PC (윈도우용 EXE 단독실행)</span>
+                <span>Windows PC (윈도우 무설치 단독 실행)</span>
               </div>
-              <a href="/api/download-app/windows" class="btn btn-primary btn-sm btn-os-dl" download>
-                📥 윈도우용 다운로드 (.zip)
-              </a>
+              <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <a href="/api/download-app/windows-exe" class="btn btn-primary btn-sm btn-os-dl" download="SubtitleRemover.exe">
+                  ⚡ SubtitleRemover.exe 바로 받기
+                </a>
+                <a href="/api/download-app/windows" class="btn btn-secondary btn-sm btn-os-dl" download>
+                  📦 ZIP 압축팩
+                </a>
+              </div>
             </div>
             <div class="os-steps">
-              <span class="os-step-badge">🚀 1초 실행 방법 (파이썬 설치 불필요!):</span>
+              <span class="os-step-badge">🚀 초간단 1초 실행 방법:</span>
               <ol class="os-step-list">
-                <li>다운로드한 <code>SubtitleRemover-Windows.zip</code>의 압축을 풉니다.</li>
-                <li>폴더 안의 <strong><code>SubtitleRemover.exe</code></strong> (또는 <code>run_windows.bat</code>)를 <strong>더블클릭</strong>하면 즉시 프로그램 창이 열립니다!</li>
+                <li><strong><code>SubtitleRemover.exe 바로 받기</code></strong>를 클릭하여 파일을 다운로드합니다. (압축 해제 필요 없음!)</li>
+                <li>다운로드된 <strong><code>SubtitleRemover.exe</code></strong> 파일을 <strong>더블클릭</strong>하면 즉시 프로그램 창이 열립니다!</li>
               </ol>
+              <div style="margin-top:0.4rem; font-size:0.76rem; color:var(--text-dim); line-height:1.4;">
+                💡 파이썬이나 추가 프로그램 설치가 전혀 필요 없는 100% 완전 독립 실행 파일입니다.
+              </div>
             </div>
           </div>
 

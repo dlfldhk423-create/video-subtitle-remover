@@ -155,7 +155,7 @@ async def admin_clean_storage():
 
 @app.get("/api/download-app/windows")
 async def download_windows_app():
-    """Windows PC용 실행 패키지 다운로드"""
+    """Windows PC용 실행 패키지 다운로드 (ZIP)"""
     file_path = os.path.join(STATIC_DIR, "downloads", "SubtitleRemover-Windows.zip")
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="다운로드 파일을 찾을 수 없습니다.")
@@ -163,6 +163,19 @@ async def download_windows_app():
         path=file_path,
         filename="SubtitleRemover-Windows.zip",
         media_type="application/zip"
+    )
+
+
+@app.get("/api/download-app/windows-exe")
+async def download_windows_exe():
+    """Windows PC용 단독 실행 EXE 파일 직접 다운로드 (압축 해제 불필요)"""
+    file_path = os.path.join(STATIC_DIR, "downloads", "SubtitleRemover.exe")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="다운로드 파일을 찾을 수 없습니다.")
+    return FileResponse(
+        path=file_path,
+        filename="SubtitleRemover.exe",
+        media_type="application/vnd.microsoft.portable-executable"
     )
 
 

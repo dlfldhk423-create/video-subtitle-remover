@@ -21,3 +21,4 @@ static/*_thumb.jpg
 
 # 대용량 바이너리 배포 패키지 (GitHub 100MB 제한)
 static/downloads/SubtitleRemover-Windows.zip
+static/downloads/SubtitleRemover.exe
