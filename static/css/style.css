@@ -206,13 +206,8 @@ body {
 
 .pdb-os-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.2rem;
-}
-@media (max-width: 820px) {
-  .pdb-os-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .pdb-os-card {
