@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 비디오 자막 삭제 스튜디오 | Subtitle Remover Pro</title>
+  <meta name="description" content="AI 텍스트 마스킹과 인페인팅 기술로 비디오 영상에 새겨진 하드서브 자막과 워터마크를 완벽하게 제거하는 웹 프로그램">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- 배경 글로우 효과 -->
+  <div class="glow-bg glow-1"></div>
+  <div class="glow-bg glow-2"></div>
+
+  <div class="app-container">
+    <!-- 헤더 -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 10l5 5m0-5l-5 5M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">Subtitle Remover <span>AI</span></h1>
+          <p class="logo-sub">AI 텍스트 인페인팅 & 하드서브 자막 자동 복원 스튜디오</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-accent">Mac M-Series 가속</span>
+        <span class="badge badge-outline">무손실 오디오 유지</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- 1단계: 업로드 영역 -->
+      <section id="upload-section" class="card upload-card">
+        <div id="drop-zone" class="drop-zone">
+          <input type="file" id="video-file-input" accept="video/mp4,video/quicktime,video/mkv,video/webm" hidden>
+          <div class="upload-icon-wrap">
+            <svg class="upload-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="upload-title">자막을 지울 영상을 여기에 드래그하거나 클릭하세요</h3>
+          <p class="upload-desc">MP4, MOV, MKV, WebM 등 모든 동영상 지원 (최대 해상도 4K 지원)</p>
+          <div style="display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap;">
+            <button type="button" id="btn-select-file" class="btn btn-primary">영상 파일 선택</button>
+            <button type="button" id="btn-load-sample" class="btn btn-secondary">🎬 샘플 영상으로 즉시 체험</button>
+          </div>
+        </div>
+
+        <!-- 업로드 로딩 상태 -->
+        <div id="upload-loading" class="loading-overlay hidden">
+          <div class="spinner"></div>
+          <p class="loading-text" id="upload-status-text">영상을 업로드하고 분석하는 중입니다...</p>
+        </div>
+      </section>
+
+      <!-- 2단계: 에디터 및 작업 공간 (업로드 후 표시) -->
+      <section id="editor-section" class="editor-grid hidden">
+        <!-- 좌측: 비디오 뷰어 및 캔버스 영역 -->
+        <div class="card viewer-card">
+          <div class="card-header">
+            <div class="title-with-meta">
+              <h2 class="card-title">자막 영역 지정</h2>
+              <span id="video-meta-badge" class="meta-tag">1920x1080 | 30fps</span>
+            </div>
+            <div class="preset-buttons">
+              <button type="button" id="preset-bottom" class="btn-chip" title="하단 표준 자막 위치">하단 자막</button>
+              <button type="button" id="preset-bottom-wide" class="btn-chip" title="하단 2줄 자막 위치">하단 와이드</button>
+              <button type="button" id="preset-top" class="btn-chip" title="상단 타이틀/워터마크 위치">상단 제목</button>
+              <button type="button" id="preset-clear" class="btn-chip btn-chip-danger" title="모든 영역 지우기">초기화</button>
+            </div>
+          </div>
+
+          <div class="canvas-viewport" id="canvas-container">
+            <!-- 비디오 프레임 이미지 캔버스 -->
+            <canvas id="frame-canvas"></canvas>
+            <div id="selection-box" class="selection-box hidden">
+              <div class="box-label">자막 영역</div>
+            </div>
+          </div>
+
+          <!-- 타임라인 슬라이더 컨트롤 -->
+          <div class="timeline-control">
+            <div class="timeline-info">
+              <span class="timeline-label">타임라인 탐색</span>
+              <span id="current-time-text" class="time-display">00:00.0 / 00:00.0</span>
+            </div>
+            <input type="range" id="time-slider" min="0" max="100" value="0" step="0.1" class="slider">
+          </div>
+
+          <!-- 영역 목록 표시 -->
+          <div class="roi-list-container">
+            <span class="roi-list-title">지정된 제거 영역:</span>
+            <div id="roi-badges" class="roi-badges">
+              <span class="empty-hint">마우스로 화면 위를 드래그하여 자막 영역을 지정하세요.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 우측: AI 인페인팅 옵션 및 프리뷰 패널 -->
+        <div class="side-panel">
+          <!-- 설정 카드 -->
+          <div class="card settings-card">
+            <h2 class="card-title">인페인팅 설정</h2>
+
+            <div class="form-group">
+              <label class="form-label">제거 알고리즘 모드</label>
+              <div class="radio-cards">
+                <label class="radio-card selected">
+                  <input type="radio" name="inpaint-mode" value="smart_text" checked>
+                  <div class="radio-card-body">
+                    <span class="rc-title">✨ 스마트 텍스트 (추천)</span>
+                    <span class="rc-desc">배경은 보존하고 글자 픽셀만 감지하여 정밀 제거</span>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="inpaint-mode" value="full_box">
+                  <div class="radio-card-body">
+                    <span class="rc-title">🔲 영역 전체 복원</span>
+                    <span class="rc-desc">선택 박스 전체를 주변 배경으로 채움</span>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="inpaint-mode" value="blur">
+                  <div class="radio-card-body">
+                    <span class="rc-title">💧 스마트 블러</span>
+                    <span class="rc-desc">자막 영역을 부드럽게 블러/모자이크</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 세부 파라미터 -->
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="mask-dilation" class="form-label">글자 테두리 확장 (여백)</label>
+                <span id="val-dilation" class="slider-val">3 px</span>
+              </div>
+              <input type="range" id="mask-dilation" min="1" max="8" value="3" step="1" class="slider">
+              <p class="param-help">자막 외곽선이나 그림자까지 남지 않도록 영역을 넓힙니다.</p>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="inpaint-radius" class="form-label">인페인팅 반경 (블렌딩)</label>
+                <span id="val-radius" class="slider-val">4 px</span>
+              </div>
+              <input type="range" id="inpaint-radius" min="2" max="10" value="4" step="1" class="slider">
+            </div>
+
+            <!-- 미리보기 버튼 -->
+            <button type="button" id="btn-preview" class="btn btn-secondary btn-block">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              현재 프레임 미리보기 (0.1초)
+            </button>
+          </div>
+
+          <!-- 미리보기 결과 카드 -->
+          <div id="preview-card" class="card preview-card hidden">
+            <div class="card-header">
+              <h3 class="card-title">미리보기 결과</h3>
+              <div class="preview-tabs">
+                <button type="button" class="tab-btn active" data-tab="cleaned">자막 제거 결과</button>
+                <button type="button" class="tab-btn" data-tab="mask">AI 감지 마스크</button>
+              </div>
+            </div>
+            <div class="preview-display">
+              <img id="preview-img-cleaned" class="preview-img" alt="자막 제거 결과 미리보기">
+              <img id="preview-img-mask" class="preview-img hidden" alt="마스크 시각화 미리보기">
+            </div>
+          </div>
+
+          <!-- 최종 실행 카드 -->
+          <div class="card action-card">
+            <button type="button" id="btn-start-process" class="btn btn-action btn-block">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              전체 영상 자막 삭제 시작
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3단계: 렌더링 진행률 화면 -->
+      <section id="progress-section" class="card progress-card hidden">
+        <div class="progress-header">
+          <div class="spinner"></div>
+          <div>
+            <h2 class="card-title">자막 삭제 렌더링 진행 중</h2>
+            <p class="card-sub" id="progress-status-desc">프레임별로 AI 인페인팅을 적용하고 있습니다...</p>
+          </div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+
+        <div class="progress-metrics">
+          <div class="metric">
+            <span class="metric-label">진행률</span>
+            <span class="metric-value" id="metric-percent">0.0%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">처리 프레임</span>
+            <span class="metric-value" id="metric-frames">0 / 0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">처리 속도</span>
+            <span class="metric-value" id="metric-fps">0 FPS</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">예상 남은 시간</span>
+            <span class="metric-value" id="metric-eta">계산 중...</span>
+          </div>
+        </div>
+
+        <div class="progress-actions">
+          <button type="button" id="btn-cancel-process" class="btn btn-danger">작업 취소</button>
+        </div>
+      </section>
+
+      <!-- 4단계: 완료 및 다운로드 화면 -->
+      <section id="result-section" class="card result-card hidden">
+        <div class="result-header">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">자막 삭제가 완료되었습니다!</h2>
+            <p class="card-sub">원본 오디오가 보존된 고화질 영상이 생성되었습니다.</p>
+          </div>
+        </div>
+
+        <!-- 완료된 비디오 플레이어 -->
+        <div class="video-preview-wrapper">
+          <video id="result-video-player" controls class="result-video"></video>
+        </div>
+
+        <div class="result-actions">
+          <a id="btn-download-video" href="#" class="btn btn-action btn-large" download>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            완성된 비디오 다운로드 (MP4)
+          </a>
+          <button type="button" id="btn-new-video" class="btn btn-outline">새 영상 작업하기</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>AI Video Subtitle Inpainting Studio • OpenCV Telea & Navier-Stokes Engine • High Quality Audio Passthrough</p>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

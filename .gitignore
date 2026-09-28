@@ -1,0 +1,24 @@
+# Python 가상환경 및 캐시
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 업로드 및 출력 결과 비디오 (개인 파일 보호)
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# 임시 테스트 파일
+sample_cleaned.mp4
+test_orig_frame.jpg
+test_cleaned_frame.jpg
+static/*_thumb.jpg
+
+# OS 및 에디터 설정
+.DS_Store
+.idea/
+.vscode/
+*.swp
