@@ -133,6 +133,87 @@ body {
 .header-badges {
   display: flex;
   gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-download-badge {
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--transition-fast);
+}
+.btn-win {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+}
+.btn-win:hover {
+  background: rgba(14, 165, 233, 0.25);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+  transform: translateY(-1px);
+}
+.btn-mac {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.btn-mac:hover {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* PC 다운로드 배너 */
+.pc-download-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.86rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.pdb-text {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-muted);
+}
+.pdb-tag {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+.pdb-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.btn-text-link {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  transition: all var(--transition-fast);
+}
+.btn-text-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+.pdb-divider {
+  color: var(--card-border);
 }
 
 .badge {

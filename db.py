@@ -95,16 +95,16 @@ def update_task_status(task_id: str, status: str, processing_time_sec: float = 0
 
 
 def get_dashboard_stats() -> Dict[str, Any]:
-    """관리자 요약 통계 지표 계산"""
+    """관리자 요약 통계 지표 계산 (실제 페이지 방문만 집계)"""
     with get_db() as conn:
         cursor = conn.cursor()
 
-        # 총 방문 수
-        cursor.execute("SELECT COUNT(*) FROM visit_logs")
+        # 실제 사이트 메인 페이지 접속 수 (path = '/')
+        cursor.execute("SELECT COUNT(*) FROM visit_logs WHERE path = '/'")
         total_visits = cursor.fetchone()[0]
 
         # 오늘 방문 수
-        cursor.execute("SELECT COUNT(*) FROM visit_logs WHERE date(created_at) = date('now')")
+        cursor.execute("SELECT COUNT(*) FROM visit_logs WHERE path = '/' AND date(created_at) = date('now')")
         today_visits = cursor.fetchone()[0]
 
         # 총 처리 작업 수
@@ -120,7 +120,7 @@ def get_dashboard_stats() -> Dict[str, Any]:
         total_video_seconds = cursor.fetchone()[0]
 
         # 모바일 vs 데스크톱 비율
-        cursor.execute("SELECT device, COUNT(*) FROM visit_logs GROUP BY device")
+        cursor.execute("SELECT device, COUNT(*) FROM visit_logs WHERE path = '/' GROUP BY device")
         devices = dict(cursor.fetchall())
 
         return {

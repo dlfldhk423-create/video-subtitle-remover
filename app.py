@@ -57,10 +57,10 @@ cancel_flags: Dict[str, bool] = {}
 
 @app.middleware("http")
 async def track_visitors_middleware(request: Request, call_next):
-    """방문자 접속 정보 자동 로깅"""
+    """방문자 접속 정보 자동 로깅 (API 폴링 및 정적 리소스 제외, 실제 사이트 접속만 기록)"""
     path = request.url.path
-    # 정적 리소스는 제외하고 주요 페이지 및 API 요청만 기록
-    if not path.startswith(("/static", "/outputs", "/favicon.ico")) and request.method == "GET":
+    # API 요청, 정적 파일, 헬스체크는 제외하고 오직 메인 웹페이지('/') 접속만 방문자로 카운트
+    if path == "/" and request.method == "GET":
         client_ip = request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for") or (request.client.host if request.client else "unknown")
         if "," in client_ip:
             client_ip = client_ip.split(",")[0].strip()
@@ -151,6 +151,32 @@ async def admin_clean_storage():
         "cleaned_files": cleaned_count,
         "cleaned_mb": round(cleaned_bytes / (1024 * 1024), 2)
     })
+
+
+@app.get("/api/download-app/windows")
+async def download_windows_app():
+    """Windows PC용 실행 패키지 다운로드"""
+    file_path = os.path.join(STATIC_DIR, "downloads", "SubtitleRemover-Windows.zip")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="다운로드 파일을 찾을 수 없습니다.")
+    return FileResponse(
+        path=file_path,
+        filename="SubtitleRemover-Windows.zip",
+        media_type="application/zip"
+    )
+
+
+@app.get("/api/download-app/mac")
+async def download_mac_app():
+    """MacBook용 실행 패키지 다운로드"""
+    file_path = os.path.join(STATIC_DIR, "downloads", "SubtitleRemover-Mac.zip")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="다운로드 파일을 찾을 수 없습니다.")
+    return FileResponse(
+        path=file_path,
+        filename="SubtitleRemover-Mac.zip",
+        media_type="application/zip"
+    )
 
 
 @app.post("/api/upload")
