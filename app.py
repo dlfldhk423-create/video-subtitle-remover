@@ -41,7 +41,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 
-app = FastAPI(title="AI 비디오 자막 삭제 스튜디오")
+app = FastAPI(title="AI 비디오 자막 블러 처리 스튜디오")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 

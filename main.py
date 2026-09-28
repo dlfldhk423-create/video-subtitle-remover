@@ -1,5 +1,5 @@
 """
-Subtitle Remover AI - Windows EXE Main Launcher
+Subtitle Blur AI - Windows EXE Main Launcher
 더블클릭 시 Uvicorn 웹 서버를 가동하고 웹 브라우저를 자동으로 엽니다.
 """
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     print("=" * 60)
-    print("      🎬 AI Video Subtitle Remover Studio 실행 중...      ")
+    print("      🎬 AI Video Subtitle Blur Studio 실행 중...      ")
     print("=" * 60)
     print("서버가 시작되었습니다. 잠시 후 웹 브라우저가 자동으로 열립니다.")
     print("접속 주소: http://127.0.0.1:8000")

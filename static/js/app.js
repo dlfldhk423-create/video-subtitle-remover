@@ -628,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 8. 작업 취소
   btnCancelProcess.addEventListener('click', async () => {
     if (!currentTaskId) return;
-    if (confirm('진행 중인 자막 삭제 작업을 취소하시겠습니까?')) {
+    if (confirm('진행 중인 자막 블러 처리 작업을 취소하시겠습니까?')) {
       await fetch(`/api/cancel/${currentTaskId}`, { method: 'POST' });
     }
   });

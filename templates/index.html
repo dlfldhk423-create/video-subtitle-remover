@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 비디오 자막 삭제 스튜디오 | Subtitle Remover Pro</title>
-  <meta name="description" content="AI 텍스트 마스킹과 인페인팅 기술로 비디오 영상에 새겨진 하드서브 자막과 워터마크를 완벽하게 제거하는 웹 프로그램">
+  <title>AI 비디오 자막 블러 처리 스튜디오 | Subtitle Blur Pro</title>
+  <meta name="description" content="AI 텍스트 마스킹과 블러 인페인팅 기술로 비디오 영상에 새겨진 하드서브 자막과 워터마크를 깔끔하게 블러 처리하는 웹 프로그램">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -25,8 +25,8 @@
           </svg>
         </div>
         <div>
-          <h1 class="logo-title">Subtitle Remover <span>AI</span></h1>
-          <p class="logo-sub">AI 텍스트 인페인팅 & 하드서브 자막 자동 복원 스튜디오</p>
+          <h1 class="logo-title">Subtitle Blur <span>AI</span></h1>
+          <p class="logo-sub">AI 텍스트 인페인팅 & 하드서브 자막 블러 처리 스튜디오</p>
         </div>
       </div>
       {% if not is_local %}
@@ -95,7 +95,7 @@
               <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h3 class="upload-title">자막을 지울 영상을 여기에 드래그하거나 클릭하세요</h3>
+          <h3 class="upload-title">자막을 블러 처리할 영상을 여기에 드래그하거나 클릭하세요</h3>
           <p class="upload-desc">MP4, MOV, MKV, WebM 등 모든 동영상 지원 (최대 해상도 4K 지원)</p>
           <div style="display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap;">
             <button type="button" id="btn-select-file" class="btn btn-primary">영상 파일 선택</button>
@@ -149,7 +149,7 @@
 
           <!-- 영역 목록 표시 -->
           <div class="roi-list-container">
-            <span class="roi-list-title">지정된 제거 영역:</span>
+            <span class="roi-list-title">지정된 블러 영역:</span>
             <div id="roi-badges" class="roi-badges">
               <span class="empty-hint">화면 위 자막을 손가락으로 톡 누르거나 드래그하여 영역을 지정하세요.</span>
             </div>
@@ -222,12 +222,12 @@
             <div class="card-header">
               <h3 class="card-title">미리보기 결과</h3>
               <div class="preview-tabs">
-                <button type="button" class="tab-btn active" data-tab="cleaned">자막 제거 결과</button>
+                <button type="button" class="tab-btn active" data-tab="cleaned">자막 블러 결과</button>
                 <button type="button" class="tab-btn" data-tab="mask">AI 감지 마스크</button>
               </div>
             </div>
             <div class="preview-display">
-              <img id="preview-img-cleaned" class="preview-img" alt="자막 제거 결과 미리보기">
+              <img id="preview-img-cleaned" class="preview-img" alt="자막 블러 결과 미리보기">
               <img id="preview-img-mask" class="preview-img hidden" alt="마스크 시각화 미리보기">
             </div>
           </div>
@@ -238,7 +238,7 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
               </svg>
-              전체 영상 자막 삭제 시작
+              전체 영상 자막 블러 처리 시작
             </button>
           </div>
         </div>
@@ -249,8 +249,8 @@
         <div class="progress-header">
           <div class="spinner"></div>
           <div>
-            <h2 class="card-title">자막 삭제 렌더링 진행 중</h2>
-            <p class="card-sub" id="progress-status-desc">프레임별로 AI 인페인팅을 적용하고 있습니다...</p>
+            <h2 class="card-title">자막 블러 처리 렌더링 진행 중</h2>
+            <p class="card-sub" id="progress-status-desc">프레임별로 AI 블러 및 인페인팅을 적용하고 있습니다...</p>
           </div>
         </div>
 
@@ -291,7 +291,7 @@
             </svg>
           </div>
           <div>
-            <h2 class="card-title">자막 삭제가 완료되었습니다!</h2>
+            <h2 class="card-title">자막 블러 처리가 완료되었습니다!</h2>
             <p class="card-sub">원본 오디오가 보존된 고화질 영상이 생성되었습니다.</p>
           </div>
         </div>
