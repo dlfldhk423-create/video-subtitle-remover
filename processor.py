@@ -1,10 +1,29 @@
 import os
+import sys
 import cv2
 import numpy as np
 import subprocess
 import time
 import shutil
 from typing import List, Dict, Any, Callable, Optional
+
+
+def get_ffmpeg_cmd() -> str:
+    """Windows/Mac 환경에서 번들된 ffmpeg.exe 또는 시스템 ffmpeg 경로를 안전하게 반환합니다."""
+    candidates = []
+    if getattr(sys, 'frozen', False):
+        candidates.append(os.path.join(getattr(sys, '_MEIPASS', ''), "ffmpeg.exe"))
+        candidates.append(os.path.join(os.path.dirname(sys.executable), "ffmpeg.exe"))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ffmpeg.exe"))
+    candidates.append("ffmpeg.exe")
+    candidates.append("ffmpeg")
+
+    for path in candidates:
+        if os.path.isabs(path) and os.path.isfile(path):
+            return path
+        elif shutil.which(path):
+            return path
+    return "ffmpeg"
 
 
 def extract_frame_at_time(video_path: str, time_sec: float = 0.0) -> Optional[np.ndarray]:
@@ -251,10 +270,11 @@ def process_video_subtitles(
                 "status": "muxing_audio"
             })
 
+        ffmpeg_bin = get_ffmpeg_cmd()
         # ffmpeg로 H.264 인코딩 및 원본 오디오 스트림 복사
         # -sn 플래그는 컨테이너에 내장된 소프트 자막 트랙도 함께 제거
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_bin, "-y",
             "-i", temp_video_path,
             "-i", input_video_path,
             "-c:v", "libx264",
@@ -273,7 +293,7 @@ def process_video_subtitles(
         if proc.returncode != 0:
             # 오디오 매핑 실패 시 비디오만 저장
             cmd_fallback = [
-                "ffmpeg", "-y",
+                ffmpeg_bin, "-y",
                 "-i", temp_video_path,
                 "-c:v", "libx264",
                 "-pix_fmt", "yuv420p",

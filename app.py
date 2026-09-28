@@ -18,11 +18,19 @@ from processor import (
     process_video_subtitles
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+import sys
+
+if getattr(sys, 'frozen', False):
+    BUNDLE_DIR = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    APP_DIR = os.path.dirname(sys.executable)
+else:
+    BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
+    APP_DIR = BUNDLE_DIR
+
+UPLOAD_DIR = os.path.join(APP_DIR, "uploads")
+OUTPUT_DIR = os.path.join(APP_DIR, "outputs")
+STATIC_DIR = os.path.join(BUNDLE_DIR, "static")
+TEMPLATES_DIR = os.path.join(BUNDLE_DIR, "templates")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -82,7 +90,7 @@ async def upload_video(file: UploadFile = File(...)):
 @app.post("/api/sample")
 async def load_sample_video():
     """테스트용 샘플 영상을 업로드 폴더로 복사하고 바로 에디터를 엽니다."""
-    sample_src = os.path.join(BASE_DIR, "sample_subtitle_video.mp4")
+    sample_src = os.path.join(BUNDLE_DIR, "sample_subtitle_video.mp4")
     if not os.path.exists(sample_src):
         raise HTTPException(status_code=404, detail="샘플 영상을 찾을 수 없습니다.")
 

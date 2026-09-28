@@ -1,0 +1,48 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: 저장소 체크아웃
+      uses: actions/checkout@v4
+
+    - name: Python 3.11 설정
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: 의존성 패키지 및 PyInstaller 설치
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt pyinstaller
+
+    - name: Windows용 ffmpeg.exe 다운로드 및 배치
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile "ffmpeg.zip"
+        Expand-Archive -Path "ffmpeg.zip" -DestinationPath "temp_ffmpeg"
+        Get-ChildItem -Path "temp_ffmpeg" -Filter "ffmpeg.exe" -Recurse | Copy-Item -Destination "ffmpeg.exe"
+        Remove-Item -Recurse -Force "temp_ffmpeg", "ffmpeg.zip"
+
+    - name: PyInstaller 빌드
+      run: |
+        pyinstaller --clean SubtitleRemover.spec
+
+    - name: 결과물 압축 (ZIP)
+      shell: pwsh
+      run: |
+        Compress-Archive -Path "dist\SubtitleRemover\*" -DestinationPath "SubtitleRemover-Windows-x64.zip"
+
+    - name: 빌드된 EXE 아티팩트 업로드
+      uses: actions/upload-artifact@v4
+      with:
+        name: SubtitleRemover-Windows-x64
+        path: SubtitleRemover-Windows-x64.zip
+        retention-days: 30

@@ -34,20 +34,17 @@
 
 ## 🚀 빠른 시작 방법 (How to Run)
 
-### 방법 1. 원클릭 실행 스크립트 (추천)
-터미널에서 아래 명령어를 실행하면 필요한 가상환경 확인 후 브라우저가 자동으로 열립니다.
+### 방법 1. Mac 환경 원클릭 실행 (추천)
+터미널에서 아래 명령어를 실행하면 가상환경 확인 후 브라우저가 자동으로 열립니다.
 
 ```bash
-cd /Users/luhuji/Desktop/자동화프로그램/자막삭제프로그램
 ./run.sh
 ```
 
-### 방법 2. 직접 수동 실행
-```bash
-cd /Users/luhuji/Desktop/자동화프로그램/자막삭제프로그램
-.venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 8000
-```
-실행 후 브라우저에서 `http://localhost:8000` 에 접속하세요.
+### 방법 2. Windows PC 환경에서 실행
+- **방법 A (GitHub 자동 빌드 EXE 사용)**: 깃허브 저장소의 `Actions` 탭에서 빌드된 `SubtitleRemover-Windows-x64.zip`을 다운로드하여 압축을 풀고 `SubtitleRemover.exe`를 더블클릭합니다.
+- **방법 B (Python 환경 원클릭 실행)**: `run_windows.bat` 파일을 더블클릭하면 자동으로 가상환경 설치 후 웹 브라우저가 열립니다.
+- **방법 C (직접 EXE 빌드하기)**: `build_exe.bat` 파일을 더블클릭하면 `ffmpeg.exe` 자동 다운로드 및 PyInstaller 컴파일을 거쳐 `dist\SubtitleRemover\SubtitleRemover.exe`가 생성됩니다.
 
 ---
 
