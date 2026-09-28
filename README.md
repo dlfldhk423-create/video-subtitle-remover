@@ -2,6 +2,10 @@
 
 > **GitHub 오픈소스 기반의 강력한 AI 텍스트 마스킹 & 비디오 인페인팅(Inpainting) 기술**을 결합하여, 동영상에 박혀있는 하드서브(Hardcoded) 자막이나 워터마크를 주변 배경 훼손 없이 깨끗하게 제거하고 원본 고음질 오디오를 그대로 유지해주는 웹 스튜디오 프로그램입니다.
 
+### 🌐 온라인 데모 바로가기 (설치 없이 즉시 실행)
+👉 **[https://integrity-everyone-regard-host.trycloudflare.com](https://integrity-everyone-regard-host.trycloudflare.com)**
+*(스마트폰, 태블릿, 윈도우/맥 어디서든 별도 프로그램 설치 없이 브라우저로 접속하여 바로 자막 삭제 가능)*
+
 ---
 
 ## ✨ 주요 기능 및 특징
