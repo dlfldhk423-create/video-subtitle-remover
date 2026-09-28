@@ -237,32 +237,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 80);
   });
 
-  // 4. 캔버스 마우스 드래그로 자막 박스(ROI) 그리기
-  let isDragging = false;
+  // 4. 마우스 & 모바일 터치로 자막 박스(ROI) 지정하기
+  let isPointerDown = false;
   let startX = 0;
   let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
   let containerRect = null;
+  let isTouchAction = false;
 
-  canvasContainer.addEventListener('mousedown', (e) => {
+  function getPointerPos(e) {
+    if (e.touches && e.touches.length > 0) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+    }
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+    }
+    return { clientX: e.clientX, clientY: e.clientY };
+  }
+
+  function handleStart(e) {
     if (!videoInfo) return;
-    isDragging = true;
+    if (e.type.startsWith('touch')) {
+      isTouchAction = true;
+    }
+    isPointerDown = true;
     containerRect = canvasContainer.getBoundingClientRect();
+    const pos = getPointerPos(e);
 
-    startX = e.clientX - containerRect.left;
-    startY = e.clientY - containerRect.top;
+    startX = pos.clientX - containerRect.left;
+    startY = pos.clientY - containerRect.top;
+    currentX = startX;
+    currentY = startY;
 
     selectionBox.style.left = `${startX}px`;
     selectionBox.style.top = `${startY}px`;
     selectionBox.style.width = '0px';
     selectionBox.style.height = '0px';
     selectionBox.classList.remove('hidden');
-  });
+  }
 
-  window.addEventListener('mousemove', (e) => {
-    if (!isDragging || !containerRect) return;
+  function handleMove(e) {
+    if (!isPointerDown || !containerRect) return;
+    if (e.cancelable && isTouchAction) {
+      e.preventDefault(); // 모바일 화면 스크롤 방지
+    }
 
-    const currentX = e.clientX - containerRect.left;
-    const currentY = e.clientY - containerRect.top;
+    const pos = getPointerPos(e);
+    currentX = pos.clientX - containerRect.left;
+    currentY = pos.clientY - containerRect.top;
 
     const left = Math.min(startX, currentX);
     const top = Math.min(startY, currentY);
@@ -273,48 +296,96 @@ document.addEventListener('DOMContentLoaded', () => {
     selectionBox.style.top = `${top}px`;
     selectionBox.style.width = `${width}px`;
     selectionBox.style.height = `${height}px`;
-  });
+  }
 
-  window.addEventListener('mouseup', (e) => {
-    if (!isDragging) return;
-    isDragging = false;
+  function handleEnd(e) {
+    if (!isPointerDown) return;
+    isPointerDown = false;
     selectionBox.classList.add('hidden');
 
-    if (!containerRect) return;
+    if (!containerRect || !videoInfo) return;
 
-    const endX = e.clientX - containerRect.left;
-    const endY = e.clientY - containerRect.top;
+    const canvasDisplayW = frameCanvas.clientWidth;
+    const canvasDisplayH = frameCanvas.clientHeight;
+    if (canvasDisplayW <= 0 || canvasDisplayH <= 0) return;
 
-    const boxW = Math.abs(endX - startX);
-    const boxH = Math.abs(endY - startY);
+    const scaleX = videoInfo.width / canvasDisplayW;
+    const scaleY = videoInfo.height / canvasDisplayH;
 
-    // 최소 10px 이상 드래그했을 때만 영역 등록
-    if (boxW > 10 && boxH > 10) {
-      const canvasDisplayW = frameCanvas.clientWidth;
-      const canvasDisplayH = frameCanvas.clientHeight;
-      const scaleX = videoInfo.width / canvasDisplayW;
-      const scaleY = videoInfo.height / canvasDisplayH;
+    const canvasRect = frameCanvas.getBoundingClientRect();
+    const offsetX = canvasRect.left - containerRect.left;
+    const offsetY = canvasRect.top - containerRect.top;
 
-      // 캔버스 내 오프셋 보정
-      const canvasRect = frameCanvas.getBoundingClientRect();
-      const offsetX = canvasRect.left - containerRect.left;
-      const offsetY = canvasRect.top - containerRect.top;
+    const boxW = Math.abs(currentX - startX);
+    const boxH = Math.abs(currentY - startY);
 
-      const clickBoxLeft = Math.min(startX, endX) - offsetX;
-      const clickBoxTop = Math.min(startY, endY) - offsetY;
+    // 1) 손가락 클릭 / 탭 (드래그하지 않고 톡 누른 경우)
+    // 👉 탭한 높이를 중심으로 맞춤형 자막 박스 자동 생성!
+    if (boxW <= 12 && boxH <= 12) {
+      const tapXInCanvas = startX - offsetX;
+      const tapYInCanvas = startY - offsetY;
 
-      const realX = Math.max(0, Math.round(clickBoxLeft * scaleX));
-      const realY = Math.max(0, Math.round(clickBoxTop * scaleY));
-      const realW = Math.min(videoInfo.width - realX, Math.round(boxW * scaleX));
-      const realH = Math.min(videoInfo.height - realY, Math.round(boxH * scaleY));
-
-      if (realW > 5 && realH > 5) {
-        activeROIs.push({ x: realX, y: realY, width: realW, height: realH });
-        updateROIBadges();
-        renderCanvas();
+      // 캔버스 밖 클릭 방지
+      if (tapXInCanvas < 0 || tapXInCanvas > canvasDisplayW || tapYInCanvas < 0 || tapYInCanvas > canvasDisplayH) {
+        return;
       }
+
+      const realTapY = Math.round(tapYInCanvas * scaleY);
+
+      // 자막 기본 높이: 비디오 세로의 약 14% (1줄~2줄 자막에 최적화)
+      const autoH = Math.max(40, Math.round(videoInfo.height * 0.14));
+      // 자막 기본 너비: 비디오 가로의 약 86%
+      const autoW = Math.round(videoInfo.width * 0.88);
+      const autoX = Math.round((videoInfo.width - autoW) / 2);
+
+      // 탭한 지점이 자막 박스의 세로 중앙이 되도록 배치
+      let autoY = Math.round(realTapY - autoH / 2);
+      autoY = Math.max(0, Math.min(videoInfo.height - autoH, autoY));
+
+      // 손가락으로 탭했을 때는 기존 영역을 초기화하고 탭한 위치로 깔끔하게 교체
+      activeROIs = [{ x: autoX, y: autoY, width: autoW, height: autoH }];
+      updateROIBadges();
+      renderCanvas();
+      showTapFeedback(startX, startY);
+      return;
     }
-  });
+
+    // 2) 손가락 또는 마우스로 직접 드래그한 경우
+    const clickBoxLeft = Math.min(startX, currentX) - offsetX;
+    const clickBoxTop = Math.min(startY, currentY) - offsetY;
+
+    const realX = Math.max(0, Math.round(clickBoxLeft * scaleX));
+    const realY = Math.max(0, Math.round(clickBoxTop * scaleY));
+    const realW = Math.min(videoInfo.width - realX, Math.round(boxW * scaleX));
+    const realH = Math.min(videoInfo.height - realY, Math.round(boxH * scaleY));
+
+    if (realW > 10 && realH > 10) {
+      activeROIs.push({ x: realX, y: realY, width: realW, height: realH });
+      updateROIBadges();
+      renderCanvas();
+    }
+  }
+
+  // 탭 피드백 애니메이션
+  function showTapFeedback(x, y) {
+    const ripple = document.createElement('div');
+    ripple.className = 'tap-ripple';
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    canvasContainer.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+
+  // 마우스 이벤트 등록
+  canvasContainer.addEventListener('mousedown', handleStart);
+  window.addEventListener('mousemove', handleMove);
+  window.addEventListener('mouseup', handleEnd);
+
+  // 터치(모바일 손가락) 이벤트 등록
+  canvasContainer.addEventListener('touchstart', handleStart, { passive: false });
+  window.addEventListener('touchmove', handleMove, { passive: false });
+  window.addEventListener('touchend', handleEnd, { passive: false });
+  window.addEventListener('touchcancel', handleEnd, { passive: false });
 
   // 프리셋 핸들러
   function applyPreset(type) {
