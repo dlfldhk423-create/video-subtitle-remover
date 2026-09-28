@@ -1,24 +1,42 @@
 @echo off
-chcp 65001 > nul
-setlocal
+cd /d "%~dp0"
 
 echo ==========================================================
-echo      🎬 AI Video Subtitle Remover Studio 실행 중...
+echo      AI Video Subtitle Remover Studio Launcher
 echo ==========================================================
 echo.
 
-:: 가상환경 확인 및 생성
+:: 1. SubtitleRemover.exe가 있으면 직접 실행 (파이썬 설치 불필요!)
+if exist "SubtitleRemover.exe" (
+    echo Launching SubtitleRemover.exe...
+    start "" "SubtitleRemover.exe"
+    exit /b 0
+)
+
+if exist "dist\SubtitleRemover\SubtitleRemover.exe" (
+    echo Launching SubtitleRemover.exe...
+    start "" "dist\SubtitleRemover\SubtitleRemover.exe"
+    exit /b 0
+)
+
+:: 2. 파이썬 환경으로 실행
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] Python is not installed.
+    echo Please run SubtitleRemover.exe directly, or install Python from https://www.python.org/
+    pause
+    exit /b 1
+)
+
 if not exist ".venv" (
-    echo 가상환경을 구성하고 있습니다...
+    echo Creating virtual environment...
     python -m venv .venv
     call .venv\Scripts\activate.bat
-    echo 필수 라이브러리를 설치합니다...
     pip install -r requirements.txt
 ) else (
     call .venv\Scripts\activate.bat
 )
 
-echo 웹 스튜디오 서버를 시작합니다 (http://127.0.0.1:8000)...
+echo Starting Web Studio (http://127.0.0.1:8000)...
 python main.py
-
 pause

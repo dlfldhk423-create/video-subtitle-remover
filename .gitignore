@@ -19,8 +19,5 @@ test_orig_frame.jpg
 test_cleaned_frame.jpg
 static/*_thumb.jpg
 
-# OS 및 에디터 설정
-.DS_Store
-.idea/
-.vscode/
-*.swp
+# 대용량 바이너리 배포 패키지 (GitHub 100MB 제한)
+static/downloads/SubtitleRemover-Windows.zip
