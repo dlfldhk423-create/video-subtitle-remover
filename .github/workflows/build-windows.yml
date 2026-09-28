@@ -38,11 +38,13 @@ jobs:
     - name: 결과물 압축 (ZIP)
       shell: pwsh
       run: |
-        Compress-Archive -Path "dist\SubtitleRemover\*" -DestinationPath "SubtitleRemover-Windows-x64.zip"
+        Compress-Archive -Path "dist\SubtitleRemover.exe" -DestinationPath "SubtitleRemover-Windows-x64.zip"
 
-    - name: 빌드된 EXE 아티팩트 업로드
+    - name: 빌드된 EXE 및 ZIP 아티팩트 업로드
       uses: actions/upload-artifact@v4
       with:
         name: SubtitleRemover-Windows-x64
-        path: SubtitleRemover-Windows-x64.zip
+        path: |
+          dist/SubtitleRemover.exe
+          SubtitleRemover-Windows-x64.zip
         retention-days: 30
